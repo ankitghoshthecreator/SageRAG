@@ -518,4 +518,5 @@ This project is released under the MIT License.
 
 # Acknowledgements
 
-This project builds upon open-source technologies including Hugging Face Transformers, Unsloth, Qdrant, LangChain, FastAPI, PEFT, Langfuse, and the broader open-source AI ecosystem.
+This project builds upon open-source technologies including Hugging Face Transformers, Unsloth, Qdrant, LangChain, FastAPI, PEFT, Langfuse, and the broader open-source AI ecosystem.#   S a g e R A G  
+ 
