@@ -1,4 +1,4 @@
-# Enterprise Knowledge Assistant
+# SageRAG: Enterprise Knowledge Assistant
 ### Production-Ready Fine-Tuned LLM with Hybrid RAG
 
 > An enterprise-grade AI knowledge platform that enables organizations to securely search, retrieve, and reason over private documents using a fine-tuned Large Language Model (LLM), Hybrid Retrieval-Augmented Generation (RAG), and production-ready infrastructure.
@@ -518,5 +518,4 @@ This project is released under the MIT License.
 
 # Acknowledgements
 
-This project builds upon open-source technologies including Hugging Face Transformers, Unsloth, Qdrant, LangChain, FastAPI, PEFT, Langfuse, and the broader open-source AI ecosystem.#   S a g e R A G  
- 
+This project builds upon open-source technologies including Hugging Face Transformers, Unsloth, Qdrant, LangChain, FastAPI, PEFT, Langfuse, and the broader open-source AI ecosystem.
