@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Relational Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: sagerag-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: sage_rag
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Qdrant Vector Database
+  qdrant:
+    image: qdrant/qdrant:v1.11.0
+    container_name: sagerag-qdrant
+    restart: always
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: sagerag-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # MinIO S3-Compatible Object Storage
+  minio:
+    image: minio/minio:RELEASE.2024-02-09T06-00-11Z
+    container_name: sagerag-minio
+    restart: always
+    ports:
+      - "9000:9000" # API
+      - "9001:9001" # Web Console
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Simple bucket auto-creator for MinIO
+  minio-create-bucket:
+    image: minio/mc:RELEASE.2024-02-09T18-18-09Z
+    container_name: sagerag-minio-setup
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      until (/usr/bin/mc alias set myminio http://minio:9000 minioadmin minioadmin); do echo 'Waiting for MinIO...' && sleep 1; done;
+      if ! /usr/bin/mc ls myminio/sage-documents > /dev/null 2>&1; then
+        /usr/bin/mc mb myminio/sage-documents;
+        /usr/bin/mc anonymous set public myminio/sage-documents;
+        echo 'Bucket sage-documents created successfully!';
+      else
+        echo 'Bucket sage-documents already exists.';
+      fi;
+      exit 0;
+      "
+
+volumes:
+  postgres_data:
+  qdrant_data:
+  redis_data:
+  minio_data:

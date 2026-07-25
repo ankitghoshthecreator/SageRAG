@@ -15,6 +15,7 @@ from app.database.models import Document
 from app.ingestion.chunker import load_and_chunk
 from app.embeddings.service import embed_texts
 from app.retrieval.service import index_chunks, remove_document
+from app.services.object_storage import storage_client
 
 logger = logging.getLogger("sagerag.documents")
 
@@ -29,7 +30,7 @@ def _ensure_upload_dir():
 
 def save_upload(file_bytes: bytes, filename: str) -> Tuple[str, str]:
     """
-    Persist the raw file to disk.
+    Persist the raw file to disk and upload to MinIO storage.
     Returns (document_id, file_path).
     """
     _ensure_upload_dir()
@@ -40,6 +41,10 @@ def save_upload(file_bytes: bytes, filename: str) -> Tuple[str, str]:
     with open(file_path, "wb") as f:
         f.write(file_bytes)
     logger.info(f"Saved uploaded file: {file_path}")
+    
+    # Upload to MinIO (handles errors and fallback internally)
+    storage_client.upload_file(stored_name, file_bytes)
+    
     return doc_id, file_path
 
 
@@ -137,6 +142,10 @@ def delete_document(db: Session, doc_id: str, user_id: int) -> bool:
 
     # Remove from vector stores
     remove_document(doc_id)
+
+    # Remove from MinIO (handles errors and fallback internally)
+    stored_name = os.path.basename(doc.storage_path)
+    storage_client.delete_file(stored_name)
 
     # Remove file from disk
     if os.path.exists(doc.storage_path):
