@@ -57,3 +57,17 @@ class Document(Base):
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow, nullable=False)
 
     user = relationship("User", back_populates="documents")
+
+
+class EvaluationRun(Base):
+    __tablename__ = "evaluation_runs"
+
+    id = Column(String(36), primary_key=True, index=True) # UUID string
+    session_id = Column(String(36), ForeignKey("chat_sessions.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    scores = Column(JSON, nullable=False) # JSON dict of scores
+    sample_count = Column(Integer, nullable=False)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
+
+    session = relationship("ChatSession")
+    user = relationship("User")

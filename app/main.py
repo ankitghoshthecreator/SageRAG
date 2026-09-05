@@ -7,6 +7,7 @@ from app.database.connection import init_db
 from app.auth.router import router as auth_router
 from app.documents.router import router as documents_router
 from app.chat.router import router as chat_router
+from app.evaluation.router import router as evaluation_router
 
 
 @asynccontextmanager
@@ -24,7 +25,7 @@ app = FastAPI(
         "SageRAG – Enterprise Knowledge Assistant. "
         "Hybrid RAG with fine-tuned LLMs, Qdrant, and JWT auth."
     ),
-    version="3.0.0",
+    version="4.0.0",
     lifespan=lifespan,
     docs_url="/docs",
     redoc_url="/redoc",
@@ -46,7 +47,7 @@ def read_root():
     return {
         "status": "healthy",
         "project": settings.PROJECT_NAME,
-        "version": "3.0.0",
+        "version": "4.0.0",
     }
 
 
@@ -68,3 +69,10 @@ app.include_router(
     prefix=f"{settings.API_V1_STR}/chat",
     tags=["Chat"],
 )
+
+if settings.EVALUATION_ENABLED:
+    app.include_router(
+        evaluation_router,
+        prefix=f"{settings.API_V1_STR}/evaluation",
+        tags=["Evaluation"],
+    )
