@@ -73,6 +73,10 @@ class Settings(BaseSettings):
     TOP_K_RETRIEVAL: int = 20       # candidates fetched before reranking
     TOP_K_RERANK: int = 6           # final chunks sent to LLM context
 
+    # ── Evaluation ─────────────────────────────────────────────────────────────
+    EVALUATION_ENABLED: bool = False
+
+
     model_config = SettingsConfigDict(
         env_file=env_path if os.path.exists(env_path) else None,
         env_file_encoding="utf-8",
